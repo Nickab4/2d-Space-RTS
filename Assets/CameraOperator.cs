@@ -11,10 +11,21 @@ public class CameraOperator : MonoBehaviour {
 	private static Vector3 moveToDestination = Vector3.zero;
 	private static List<string> passables = new List<string>() { "Floor" };
 	private static List<Unit> selectedUnits = new List<Unit>();
+	public static List<Unit> allUnits = new List<Unit>();
+
 	// Update is called once per frame
 	void Update () {
 		CheckCamera();
 		Cleanup();
+
+		//Do some key-handling stuff here for now
+		if (Input.GetKeyDown(KeyCode.T)) {
+			string s = "";
+			foreach(Unit u in CameraOperator.allUnits) {
+				s += u.name + "\n";
+			}
+			Debug.Log (s);
+		}
 
 	}
 
@@ -88,7 +99,11 @@ private void CheckCamera()
 		//Thread.Sleep (500);
 		if(unit != null)
 			CameraOperator.selectedUnits.Add (unit);
-		Debug.Log (selectedUnits.Count);
+		string s = "";
+		foreach (Unit u in CameraOperator.selectedUnits) {
+			s += u.name + "\n";
+		}
+		Debug.Log (s);
 	}
 	public static void UnRegisterUnit(Unit unit)
 	{

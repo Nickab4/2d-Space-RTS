@@ -12,9 +12,13 @@ public class Unit : MonoBehaviour {
 	public float stopDistanceOffset = 0.25f;
 	public bool mouseOver = false;
 	public Camera myCam;
+	
 	void Start () {
 		myCam = Camera.main;
+		CameraOperator.allUnits.Add(this);
 	}
+
+
 	// Update is called once per frame
 	void Update () {
 		//Selection Code
