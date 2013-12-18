@@ -27,6 +27,23 @@ public class CameraOperator : MonoBehaviour {
 			Debug.Log (s);
 		}
 
+		if (Input.GetKeyDown (KeyCode.Y)) {
+			string s = "";
+			foreach(Unit u in CameraOperator.selectedUnits) {
+				s += u.name + "\n";
+			}
+			Debug.Log (s);
+		}
+
+		CameraOperator.selectedUnits.Clear ();
+
+		//Handle selected units
+		foreach(Unit u in CameraOperator.allUnits) {
+			if (u.selected) {
+				CameraOperator.selectedUnits.Add(u);
+			}
+		}
+
 	}
 
 private void CheckCamera()
@@ -99,11 +116,9 @@ private void CheckCamera()
 		//Thread.Sleep (500);
 		if(unit != null)
 			CameraOperator.selectedUnits.Add (unit);
-		string s = "";
-		foreach (Unit u in CameraOperator.selectedUnits) {
-			s += u.name + "\n";
-		}
-		Debug.Log (s);
+
+
+
 	}
 	public static void UnRegisterUnit(Unit unit)
 	{

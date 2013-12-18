@@ -17,8 +17,7 @@ public class Unit : MonoBehaviour {
 		myCam = Camera.main;
 		CameraOperator.allUnits.Add(this);
 	}
-
-
+	
 	// Update is called once per frame
 	void Update () {
 		//Selection Code
@@ -30,14 +29,6 @@ public class Unit : MonoBehaviour {
 
 			if(selected == false && mouseOver == true)
 				selected = true;
-			if(selected)
-			{
-				CameraOperator.RegisterUnit(this);
-			}
-			if(!selected)
-			{
-				CameraOperator.UnRegisterUnit(this);
-			}
 		}
 		if(selected)
 		{
