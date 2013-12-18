@@ -26,6 +26,7 @@ public class Unit : MonoBehaviour {
 	void Start () {
 		myCam = Camera.main;
 		CameraOperator.allUnits.Add(this);
+
 	}
 	
 	// Update is called once per frame
@@ -128,6 +129,7 @@ public class Unit : MonoBehaviour {
 						Debug.Log (this.name + " attacked " + aTarget.name + " for " + damage + " damage.");
 						atkTime = 0f;
 						aTarget.currentHP = aTarget.currentHP - damage;
+
 					}
 				}
 				else
@@ -162,5 +164,10 @@ public class Unit : MonoBehaviour {
 			if (currentHP > maxHP)
 				currentHP = maxHP;
 		}
+	}
+	void OnGUI()
+	{
+		Vector2 Pos = Camera.main.WorldToScreenPoint(this.transform.position);
+		GUI.Label(new Rect(Pos.x - 25 , (Screen.height - Pos.y)-40, 100f, 25f), currentHP + "/" + maxHP);
 	}
 }
