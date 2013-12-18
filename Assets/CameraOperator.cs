@@ -10,7 +10,7 @@ public class CameraOperator : MonoBehaviour {
 	private Vector3 startClick = -Vector3.one;
 	private static Vector3 moveToDestination = Vector3.zero;
 	private static List<string> passables = new List<string>() { "Floor" };
-	private static List<Unit> selectedUnits = new List<Unit>();
+	public static List<Unit> selectedUnits = new List<Unit>();
 	public static List<Unit> allUnits = new List<Unit>();
 	private string ships = " ";
 	// Update is called once per frame
@@ -28,10 +28,6 @@ public class CameraOperator : MonoBehaviour {
 			}
 			Debug.Log (s);
 		}
-
-
-
-
 
 	}
 

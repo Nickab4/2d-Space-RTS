@@ -3,16 +3,24 @@ using System.Collections;
 
 public class Unit : MonoBehaviour {
 
-
+	//Admin/Matinence
 	public bool selected = false;
 	private Vector3 moveToDest = Vector3.zero;
-	public float floorOffset = 0;
+	private float floorOffset = 0;
+	private bool mouseOver = false;
+	private Camera myCam;
+	private bool Attacking;
+	private Unit aTarget;
+	private float atkTime = 0.0f;
+	//Stats
 	public float speed = 5;
-	public float turnSpeed = 25;
+	public int maxHP = 100;
+	public int currentHP = 100;
+	public int damage = 5;
+	public int range = 4;
+	public float atkSpd = 0.5f;
 	public float stopDistanceOffset = 0.25f;
-	public bool mouseOver = false;
-	public Camera myCam;
-	
+
 	void Start () {
 		myCam = Camera.main;
 		CameraOperator.allUnits.Add(this);
@@ -50,10 +58,26 @@ public class Unit : MonoBehaviour {
 			{
 				moveToDest = destination;
 				moveToDest.z = floorOffset;
+				Attacking = false;
+			}
+		}
+		if (selected && Input.GetKeyDown(KeyCode.A))
+		{
+			foreach(Unit u in CameraOperator.allUnits)
+			{
+				if(u.mouseOver == true && this.gameObject != u.gameObject)
+				{
+					aTarget = u;
+					Attacking = true;
+
+				}
+
 
 			}
 		}
 		UpdateMove();
+		Attack ();
+		Death ();
 	}
 	private void UpdateMove()
 	{
@@ -84,5 +108,45 @@ public class Unit : MonoBehaviour {
 	void OnMouseExit(){
 		mouseOver = false;
 	}
-
+	void Attack()
+	{
+		atkTime += Time.deltaTime;
+		if(Attacking)
+		{
+			if(aTarget != null)
+			{
+				//Test Range
+				if(Vector3.Distance(aTarget.transform.position, transform.position) <= range)
+				{
+					moveToDest = Vector3.zero;
+					transform.up = (aTarget.transform.position - transform.position);
+					if(atkTime > atkSpd)
+					{
+						Debug.Log (this.name + " attacked " + aTarget.name + " for " + damage + " damage.");
+						atkTime = 0f;
+						aTarget.currentHP = aTarget.currentHP - damage;
+					}
+				}
+				else
+				{
+					moveToDest = aTarget.transform.position;
+				}
+			}
+			else
+			{
+				Attacking = false;
+			}
+		}
+	}
+	void Death()
+	{
+		if(currentHP <= 0)
+		{
+			CameraOperator.selectedUnits.Remove(this);
+			CameraOperator.allUnits.Remove(this);
+			Debug.Log ("Ship Destroied! " + this.name);
+			Destroy(this.gameObject);
+			Destroy(this);
+		}
+	}
 }
