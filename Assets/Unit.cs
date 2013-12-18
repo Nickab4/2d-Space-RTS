@@ -12,6 +12,7 @@ public class Unit : MonoBehaviour {
 	private bool Attacking;
 	private Unit aTarget;
 	private float atkTime = 0.0f;
+	private float rgnTime = 0.0f;
 	//Stats
 	public float speed = 5;
 	public int maxHP = 100;
@@ -20,6 +21,7 @@ public class Unit : MonoBehaviour {
 	public int range = 4;
 	public float atkSpd = 0.5f;
 	public float stopDistanceOffset = 0.25f;
+	public int HPrgn = 2;
 
 	void Start () {
 		myCam = Camera.main;
@@ -78,6 +80,7 @@ public class Unit : MonoBehaviour {
 		UpdateMove();
 		Attack ();
 		Death ();
+		Regen ();
 	}
 	private void UpdateMove()
 	{
@@ -147,6 +150,17 @@ public class Unit : MonoBehaviour {
 			Debug.Log ("Ship Destroied! " + this.name);
 			Destroy(this.gameObject);
 			Destroy(this);
+		}
+	}
+	void Regen()
+	{
+		rgnTime += Time.deltaTime;
+		if (rgnTime > 5)
+		{
+			currentHP = currentHP + HPrgn;
+			rgnTime = 0f;
+			if (currentHP > maxHP)
+				currentHP = maxHP;
 		}
 	}
 }
