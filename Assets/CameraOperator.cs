@@ -12,11 +12,13 @@ public class CameraOperator : MonoBehaviour {
 	private static List<string> passables = new List<string>() { "Floor" };
 	private static List<Unit> selectedUnits = new List<Unit>();
 	public static List<Unit> allUnits = new List<Unit>();
-
+	private string ships = " ";
 	// Update is called once per frame
 	void Update () {
 		CheckCamera();
 		Cleanup();
+		SelectedList();
+		SelecteUpdate();
 
 		//Do some key-handling stuff here for now
 		if (Input.GetKeyDown(KeyCode.T)) {
@@ -27,22 +29,9 @@ public class CameraOperator : MonoBehaviour {
 			Debug.Log (s);
 		}
 
-		if (Input.GetKeyDown (KeyCode.Y)) {
-			string s = "";
-			foreach(Unit u in CameraOperator.selectedUnits) {
-				s += u.name + "\n";
-			}
-			Debug.Log (s);
-		}
 
-		CameraOperator.selectedUnits.Clear ();
 
-		//Handle selected units
-		foreach(Unit u in CameraOperator.allUnits) {
-			if (u.selected) {
-				CameraOperator.selectedUnits.Add(u);
-			}
-		}
+
 
 	}
 
@@ -76,6 +65,8 @@ private void CheckCamera()
 			GUI.color = new Color(1,1,1, 0.3f);
 			GUI.DrawTexture (selection, selectionHighlight);
 		}
+			//display selected ships list
+			GUI.Label(new Rect(Screen.width -75,0,75,100), ships);
 	}
 	public static float InvertMouseY(float y)
 		{
@@ -108,23 +99,22 @@ private void CheckCamera()
 		if (!Input.GetMouseButtonUp (1))
 			moveToDestination = Vector3.zero;
 	}
-	public static void RegisterUnit(Unit unit)
+	private void SelectedList()
 	{
-		//if(selectedUnits != null)
-		//	CameraOperator.selectedUnits.Clear ();
-
-		//Thread.Sleep (500);
-		if(unit != null)
-			CameraOperator.selectedUnits.Add (unit);
-
-
-
+		ships = "";
+		foreach(Unit u in CameraOperator.selectedUnits) {
+			ships += u.name + "\n";
+		}
 	}
-	public static void UnRegisterUnit(Unit unit)
+	private void SelecteUpdate()
 	{
-
-		if (unit != null)
-			CameraOperator.selectedUnits.Remove(unit);
-
+		CameraOperator.selectedUnits.Clear ();
+		
+		//Handle selected units
+		foreach(Unit u in CameraOperator.allUnits) {
+			if (u.selected) {
+				CameraOperator.selectedUnits.Add(u);
+			}
+		}
 	}
 }
