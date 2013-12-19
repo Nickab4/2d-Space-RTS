@@ -8,7 +8,6 @@ public class Unit : MonoBehaviour {
 	private Vector3 moveToDest = Vector3.zero;
 	private float floorOffset = 0;
 	private bool mouseOver = false;
-	private Camera myCam;
 	private bool Attacking;
 	private bool Moving = false;
 	private Unit aTarget;
@@ -25,9 +24,10 @@ public class Unit : MonoBehaviour {
 	public float atkSpd = 0.5f;
 	public float stopDistanceOffset = 0.25f;
 	public int HPrgn = 2;
+	public float UIHeight = 10;
 
 	void Start () {
-		myCam = Camera.main;
+		//For All Units list
 		CameraOperator.allUnits.Add(this);
 
 	}
@@ -44,6 +44,7 @@ public class Unit : MonoBehaviour {
 			if(selected == false && mouseOver == true)
 				selected = true;
 		}
+		//IFF Chekcs
 		if(CameraOperator.Player != Owner)
 		{
 			renderer.material.color = Color.red;
@@ -65,7 +66,7 @@ public class Unit : MonoBehaviour {
 				renderer.material.color = Color.white;
 		}
 
-		//Selected Orders
+		//Move Command
 		if (selected && Input.GetMouseButtonUp(1))
 		{
 			//Code To Move
@@ -107,7 +108,15 @@ public class Unit : MonoBehaviour {
 
 			}
 		}
+		//Stop Command
+		if (selected && Input.GetKeyDown(KeyCode.S))
+		{
+			moveToDest = Vector3.zero;
+			Attacking = false;
+			Moving = false;
+			aTarget = null;
 
+		}
 		Attack ();
 		UpdateMove();
 		Death ();
@@ -204,8 +213,20 @@ public class Unit : MonoBehaviour {
 	void OnGUI()
 	{
 		Vector2 Pos = Camera.main.WorldToScreenPoint(this.transform.position);
-		GUI.Label(new Rect(Pos.x - 25 , (Screen.height - Pos.y)-40, 100f, 25f), currentHP + "/" + maxHP);
-	}
+		float h = Screen.height / UIHeight;
+		//Orders Logic
+		string Orders = " S";
+		if(Attacking)
+			Orders = " A";		
+		if(Moving)
+			Orders = " M";
+		if(moveToDest != Vector3.zero && !Moving)
+			Orders = " A/M";
+		if(Attacking && Moving)
+			Orders = " Error!";
+		//GUI Overhead Print
+		GUI.Label(new Rect(Pos.x - 50 , (Screen.height - Pos.y)-h, 200f, 25f), this.name + ": " + currentHP + "/" + maxHP + Orders);
+	} 
 	void Aggro()
 	{
 		foreach(Unit u in CameraOperator.allUnits)
