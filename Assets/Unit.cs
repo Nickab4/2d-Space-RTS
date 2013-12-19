@@ -32,6 +32,7 @@ public class Unit : MonoBehaviour {
 	public bool Harvester = false;
 	public bool Turrets = false;
 	public bool RUdrop = false;
+	public bool RsrchVessel = false;
 	//Harvester Stats
 	private int CurrentRUs = 0;
 
@@ -271,8 +272,10 @@ public class Unit : MonoBehaviour {
 			Orders = " D";
 		if(Attacking && Moving)
 			Orders = " Error!";
+		if(Harvester)
+			Orders += " " + CurrentRUs + "/600 RUs";
 		//GUI Overhead Print
-		GUI.Label(new Rect(Pos.x - 50 , (Screen.height - Pos.y)-h, 200f, 25f), this.name + ": " + currentHP + "/" + maxHP + Orders);
+		GUI.Label(new Rect(Pos.x - 50 , (Screen.height - Pos.y)-h, 275f, 25f), this.name + ": " + currentHP + "/" + maxHP + Orders);
 	} 
 	void Aggro()
 	{
@@ -297,7 +300,7 @@ public class Unit : MonoBehaviour {
 		{
 			if(Vector3.Distance(u.transform.position, aTarget.gameObject.transform.position) <= 10)
 			{
-				if(u.Owner == aTarget.Owner && aTarget.Armed)
+				if(u.Owner == aTarget.Owner && u.Armed)
 					if(!u.Moving)
 						u.moveToDest = this.gameObject.transform.position;
 			}
