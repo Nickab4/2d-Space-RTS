@@ -10,6 +10,8 @@ public class Unit : MonoBehaviour {
 	private bool mouseOver = false;
 	private bool Attacking;
 	private bool Moving = false;
+	private bool Harvesting = false;
+	private bool dropping = false;
 	private Unit aTarget;
 	private float atkTime = 0.0f;
 	private float rgnTime = 0.0f;
@@ -25,6 +27,13 @@ public class Unit : MonoBehaviour {
 	public float stopDistanceOffset = 0.25f;
 	public int HPrgn = 2;
 	public float UIHeight = 10;
+	//Ship Definitions
+	public bool Armed = true;
+	public bool Harvester = false;
+	public bool Turrets = false;
+	public bool RUdrop = false;
+	//Harvester Stats
+	private int CurrentRUs = 0;
 
 	void Start () {
 		//For All Units list
@@ -78,35 +87,41 @@ public class Unit : MonoBehaviour {
 				moveToDest.z = floorOffset;
 				Attacking = false;
 				Moving = true;
+				Harvesting = false;
 			}
 		}
 		//Attack Command
 		if (selected && Input.GetKeyDown(KeyCode.A))
 		{
-			aTarget = null;
-			foreach(Unit u in CameraOperator.allUnits)
+			//Code for Hull-Locked Weapons
+			if(Armed) 
 			{
-				if(u.mouseOver == true && this.Owner != u.Owner)
+				aTarget = null;
+				foreach(Unit u in CameraOperator.allUnits)
 				{
-					aTarget = u;
-					Moving = false;
-					Attacking = true;
+					if(u.mouseOver == true && this.Owner != u.Owner)
+					{
+						aTarget = u;
+						Moving = false;
+						Attacking = true;
 
+					}
 				}
-			}
-			if(aTarget == null)
-			{
-				Vector3 destination = CameraOperator.GetDestination();
+				if(aTarget == null)
+				{
+					Vector3 destination = CameraOperator.GetDestination();
 				
-				if (destination != Vector3.zero)
-				{
-					Attacking = false;
-					Moving = false;
-					moveToDest = destination;
-					moveToDest.z = floorOffset;
-				}
+					if (destination != Vector3.zero)
+					{
+						Attacking = false;
+						Moving = false;
+						moveToDest = destination;
+						moveToDest.z = floorOffset;
+					}
 
+				}
 			}
+			//Code for Turrets(NYI)
 		}
 		//Stop Command
 		if (selected && Input.GetKeyDown(KeyCode.S))
@@ -115,13 +130,41 @@ public class Unit : MonoBehaviour {
 			Attacking = false;
 			Moving = false;
 			aTarget = null;
+			Harvesting = false;
 
+		}
+		if (selected && Input.GetKeyDown(KeyCode.H) && Harvester)
+		{
+			Harvesting = true;
+		}
+		if (selected && Input.GetKeyDown(KeyCode.D) && Harvester)
+		{
+			dropping = true;
 		}
 		Attack ();
 		UpdateMove();
 		Death ();
 		Regen ();
-		Aggro ();
+		if(Armed)
+		{
+			Aggro ();
+		}
+		if(Harvesting)
+		{
+			Harvest ();
+		}
+		if(dropping)
+		{
+			drop ();
+			if(CurrentRUs == 0)
+			{
+				dropping = false;
+				moveToDest = Vector3.zero;
+				Moving = false;
+				Harvesting = false;
+			}
+		}
+			
 	}
 	private void UpdateMove()
 	{
@@ -170,7 +213,7 @@ public class Unit : MonoBehaviour {
 						Debug.Log (this.name + " attacked " + aTarget.name + " for " + damage + " damage.");
 						atkTime = 0f;
 						aTarget.currentHP = aTarget.currentHP - damage;
-						if(!aTarget.Moving)
+						if(!aTarget.Moving && aTarget.Armed)
 							aTarget.moveToDest = this.transform.position;
 
 						CallForHelp();
@@ -222,6 +265,10 @@ public class Unit : MonoBehaviour {
 			Orders = " M";
 		if(moveToDest != Vector3.zero && !Moving)
 			Orders = " A/M";
+		if(Harvesting)
+			Orders = " H";
+		if(dropping)
+			Orders = " D";
 		if(Attacking && Moving)
 			Orders = " Error!";
 		//GUI Overhead Print
@@ -250,10 +297,97 @@ public class Unit : MonoBehaviour {
 		{
 			if(Vector3.Distance(u.transform.position, aTarget.gameObject.transform.position) <= 10)
 			{
-				if(u.Owner == aTarget.Owner)
+				if(u.Owner == aTarget.Owner && aTarget.Armed)
 					if(!u.Moving)
 						u.moveToDest = this.gameObject.transform.position;
 			}
+		}
+	}
+	void Harvest()
+	{
+		//Finds Closest Resources
+		float d = 99999;
+		Resource closest = null;
+		if(CameraOperator.allResources != null && CurrentRUs < 600) 
+		{
+			foreach(Resource r in CameraOperator.allResources)
+			{
+				if(Vector3.Distance (this.transform.position, r.transform.position) < d)
+				{
+					d = Vector3.Distance (this.transform.position, r.transform.position);
+					closest = r;
+				}
+	
+			}
+			if(closest == null)
+			{
+				Debug.Log ("No Resources on Map");
+				if(CurrentRUs > 0)
+				{
+					drop ();
+				}
+				else
+				{
+				Harvesting = false;
+				}
+			}
+			if(closest != null && Vector3.Distance(this.transform.position, closest.transform.position) <= range)
+			{
+				moveToDest = Vector3.zero;
+				transform.up = (closest.transform.position - transform.position);
+				if(atkTime > atkSpd)
+				{
+					closest.RUs = closest.RUs - damage;
+					CurrentRUs = CurrentRUs + damage;
+					atkTime = 0;
+					Debug.Log (this.name + " Harvested " + damage + " RUs from " + closest.name + "\n" + CurrentRUs + " in tank");
+				}
+				
+			}
+			else
+			{
+				if(closest != null)
+					moveToDest = closest.transform.position;
+			}
+			
+		}
+		if(CurrentRUs>= 600)
+		{
+			drop ();
+		}
+
+	}
+	void drop()
+	{
+		float D = 99999;
+		Unit drop = null;
+		foreach(Unit u in CameraOperator.allUnits)
+		{
+			if(u.RUdrop && Vector3.Distance (this.transform.position, u.transform.position) < D)
+			{
+				D = Vector3.Distance (this.transform.position, u.transform.position);
+				drop = u;
+			}
+		}
+		if(drop != null)
+		{
+			if(Vector3.Distance(this.transform.position, drop.transform.position) <= 5)
+			{
+				Build b = drop.GetComponent<Build>();
+				b.RU = b.RU + CurrentRUs;
+				Debug.Log ("Droped off " + CurrentRUs + "RUs at " +  b.name + " (" + b.RU +" total)");
+				CurrentRUs = 0;
+				moveToDest = Vector3.zero;
+			}
+			else
+			{
+				moveToDest = drop.transform.position;
+			}
+		}
+		else
+		{
+			Debug.Log ("No Dropoff Exists!");
+			Harvesting = false;
 		}
 	}
 }

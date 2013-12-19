@@ -12,6 +12,7 @@ public class CameraOperator : MonoBehaviour {
 	private static List<string> passables = new List<string>() { "Floor" };
 	public static List<Unit> selectedUnits = new List<Unit>();
 	public static List<Unit> allUnits = new List<Unit>();
+	public static List<Resource> allResources = new List<Resource>();
 	private string ships = " ";
 	public static int Player = 1;
 	// Update is called once per frame
@@ -63,7 +64,7 @@ private void CheckCamera()
 			GUI.DrawTexture (selection, selectionHighlight);
 		}
 			//display selected ships list
-			GUI.Label(new Rect(Screen.width -75,0,75,100), ships);
+			GUI.Label(new Rect(Screen.width -115,0, 115, 300), ships);
 	}
 	public static float InvertMouseY(float y)
 		{
