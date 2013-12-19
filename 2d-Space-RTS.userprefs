@@ -2,8 +2,8 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Unit.cs">
     <Files>
-      <File FileName="Assets\CameraOperator.cs" Line="70" Column="3" />
-      <File FileName="Assets\Unit.cs" Line="163" Column="17" />
+      <File FileName="Assets\Unit.cs" Line="235" Column="5" />
+      <File FileName="Assets\CameraOperator.cs" Line="33" Column="3" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

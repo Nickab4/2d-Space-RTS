@@ -10,11 +10,14 @@ public class Unit : MonoBehaviour {
 	private bool mouseOver = false;
 	private Camera myCam;
 	private bool Attacking;
+	private bool Moving = false;
 	private Unit aTarget;
 	private float atkTime = 0.0f;
 	private float rgnTime = 0.0f;
 	//Stats
+	public int Owner = 1;
 	public float speed = 5;
+	public float turnSpeed = 100;
 	public int maxHP = 100;
 	public int currentHP = 100;
 	public int damage = 5;
@@ -32,7 +35,7 @@ public class Unit : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		//Selection Code
-	if (Input.GetMouseButtonUp(0))
+	if (Input.GetMouseButtonUp(0) && CameraOperator.Player == Owner)
 		{
 			Vector3 camPos = Camera.main.WorldToScreenPoint(transform.position);
 			camPos.y = CameraOperator.InvertMouseY(camPos.y);
@@ -41,13 +44,24 @@ public class Unit : MonoBehaviour {
 			if(selected == false && mouseOver == true)
 				selected = true;
 		}
-		if(selected)
+		if(CameraOperator.Player != Owner)
 		{
-			renderer.material.color = Color.green;
+			renderer.material.color = Color.red;
 		}
 		else
 		{
 			if(!mouseOver)
+				renderer.material.color = Color.white;
+		}
+		if(selected)
+		{
+			renderer.material.color = Color.green;
+			if(CameraOperator.Player != Owner)
+				selected = false;
+		}
+		else
+		{
+			if(!mouseOver && CameraOperator.Player == Owner)
 				renderer.material.color = Color.white;
 		}
 
@@ -62,26 +76,43 @@ public class Unit : MonoBehaviour {
 				moveToDest = destination;
 				moveToDest.z = floorOffset;
 				Attacking = false;
+				Moving = true;
 			}
 		}
+		//Attack Command
 		if (selected && Input.GetKeyDown(KeyCode.A))
 		{
+			aTarget = null;
 			foreach(Unit u in CameraOperator.allUnits)
 			{
-				if(u.mouseOver == true && this.gameObject != u.gameObject)
+				if(u.mouseOver == true && this.Owner != u.Owner)
 				{
 					aTarget = u;
+					Moving = false;
 					Attacking = true;
 
 				}
-
+			}
+			if(aTarget == null)
+			{
+				Vector3 destination = CameraOperator.GetDestination();
+				
+				if (destination != Vector3.zero)
+				{
+					Attacking = false;
+					Moving = false;
+					moveToDest = destination;
+					moveToDest.z = floorOffset;
+				}
 
 			}
 		}
-		UpdateMove();
+
 		Attack ();
+		UpdateMove();
 		Death ();
 		Regen ();
+		Aggro ();
 	}
 	private void UpdateMove()
 	{
@@ -93,12 +124,12 @@ public class Unit : MonoBehaviour {
 			//Movement
 			transform.rigidbody2D.velocity = direction * speed;
 			//Turning --> Instant Z axis only
-			transform.up = (moveToDest - transform.position);
-
-			// Checks if arrived
+			transform.up = (moveToDest - transform.position);;
+			//transform.up = Vector3.Slerp (transform.position, moveToDest, turnSpeed*Time.deltaTime);
 			if (Vector3.Distance(transform.position, moveToDest) < stopDistanceOffset)
 			{
 				moveToDest = Vector3.zero;
+				Moving = false;
 			}
 		}
 		else
@@ -107,7 +138,8 @@ public class Unit : MonoBehaviour {
 	}
 	void OnMouseEnter(){
 		mouseOver = true;
-		renderer.material.color = new Color(0f,1f,0.6f);
+		if(CameraOperator.Player == Owner)
+			renderer.material.color = new Color(0f,1f,0.6f);
 	}
 	void OnMouseExit(){
 		mouseOver = false;
@@ -129,6 +161,10 @@ public class Unit : MonoBehaviour {
 						Debug.Log (this.name + " attacked " + aTarget.name + " for " + damage + " damage.");
 						atkTime = 0f;
 						aTarget.currentHP = aTarget.currentHP - damage;
+						if(!aTarget.Moving)
+							aTarget.moveToDest = this.transform.position;
+
+						CallForHelp();
 
 					}
 				}
@@ -169,5 +205,34 @@ public class Unit : MonoBehaviour {
 	{
 		Vector2 Pos = Camera.main.WorldToScreenPoint(this.transform.position);
 		GUI.Label(new Rect(Pos.x - 25 , (Screen.height - Pos.y)-40, 100f, 25f), currentHP + "/" + maxHP);
+	}
+	void Aggro()
+	{
+		foreach(Unit u in CameraOperator.allUnits)
+		{
+			if(Owner != u.Owner && !Moving && aTarget == null)
+			{
+				if(Vector3.Distance(u.transform.position, transform.position) <= range)
+				{
+				aTarget = u;
+				Attacking = true;
+				}
+				
+			}
+			
+			
+		}
+	}
+	void CallForHelp()
+	{
+		foreach(Unit u in CameraOperator.allUnits)
+		{
+			if(Vector3.Distance(u.transform.position, aTarget.gameObject.transform.position) <= 10)
+			{
+				if(u.Owner == aTarget.Owner)
+					if(!u.Moving)
+						u.moveToDest = this.gameObject.transform.position;
+			}
+		}
 	}
 }

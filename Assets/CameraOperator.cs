@@ -13,6 +13,7 @@ public class CameraOperator : MonoBehaviour {
 	public static List<Unit> selectedUnits = new List<Unit>();
 	public static List<Unit> allUnits = new List<Unit>();
 	private string ships = " ";
+	public static int Player = 1;
 	// Update is called once per frame
 	void Update () {
 		CheckCamera();
