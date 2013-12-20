@@ -5,11 +5,11 @@ public class Unit : MonoBehaviour {
 
 	//Admin/Matinence
 	public bool selected = false;
-	private Vector3 moveToDest = Vector3.zero;
+	public Vector3 moveToDest = Vector3.zero;
 	private float floorOffset = 0;
-	private bool mouseOver = false;
+	public bool mouseOver = false;
 	private bool Attacking;
-	private bool Moving = false;
+	public bool Moving = false;
 	private bool Harvesting = false;
 	private bool dropping = false;
 	private Unit aTarget;
@@ -28,6 +28,7 @@ public class Unit : MonoBehaviour {
 	public int HPrgn = 2;
 	public float UIHeight = 10;
 	//Ship Definitions
+	public bool FixedGuns = false;
 	public bool Armed = true;
 	public bool Harvester = false;
 	public bool Turrets = false;
@@ -89,6 +90,7 @@ public class Unit : MonoBehaviour {
 				Attacking = false;
 				Moving = true;
 				Harvesting = false;
+				aTarget = null;
 			}
 		}
 		//Attack Command
@@ -104,8 +106,20 @@ public class Unit : MonoBehaviour {
 					{
 						aTarget = u;
 						Moving = false;
-						Attacking = true;
-
+						if(FixedGuns)
+							Attacking = true;
+						if(Turrets && !FixedGuns)
+						{
+							Vector3 destination = CameraOperator.GetDestination();
+							
+							if (destination != Vector3.zero)
+							{
+								Attacking = false;
+								Moving = false;
+								moveToDest = destination;
+								moveToDest.z = floorOffset;
+							}
+						}
 					}
 				}
 				if(aTarget == null)
@@ -146,7 +160,7 @@ public class Unit : MonoBehaviour {
 		UpdateMove();
 		Death ();
 		Regen ();
-		if(Armed)
+		if(Armed && FixedGuns)
 		{
 			Aggro ();
 		}
@@ -231,6 +245,16 @@ public class Unit : MonoBehaviour {
 				Attacking = false;
 			}
 		}
+		if(!Attacking && !Moving && Turrets &&!FixedGuns)
+		{
+			foreach (Unit u in CameraOperator.allUnits)
+			{
+				if(Owner != u.Owner && Vector3.Distance(u.transform.position, transform.position) <= range)
+				{
+					moveToDest = Vector3.zero;
+				}
+			}
+		}
 	}
 	void Death()
 	{
@@ -285,8 +309,9 @@ public class Unit : MonoBehaviour {
 			{
 				if(Vector3.Distance(u.transform.position, transform.position) <= range)
 				{
-				aTarget = u;
-				Attacking = true;
+					aTarget = u;
+
+					Attacking = true;
 				}
 				
 			}

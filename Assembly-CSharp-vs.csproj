@@ -50,6 +50,7 @@
      <Compile Include="Assets\CameraOperator.cs" />
      <Compile Include="Assets\NewBehaviourScript.cs" />
      <Compile Include="Assets\Resource.cs" />
+     <Compile Include="Assets\Turret.cs" />
      <Compile Include="Assets\Unit.cs" />
      <None Include="Assets\Standard Assets\Skyboxes\_skybox info.txt" />
   </ItemGroup>
